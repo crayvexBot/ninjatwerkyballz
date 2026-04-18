@@ -190,6 +190,7 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
 
-# ---------------- RUN ----------------
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
