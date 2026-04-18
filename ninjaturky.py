@@ -5,10 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
-# 🔐 SECRET KEY (use Render env variable)
+# 🔐 SECRET KEY (Render env)
 app.secret_key = os.environ.get("SECRET_KEY")
 if not app.secret_key:
-    raise ValueError("SECRET_KEY is not set!")
+    raise RuntimeError("SECRET_KEY is not set!")
 
 # ---------------- FILE STORAGE ----------------
 USER_FILE = "users.json"
@@ -36,18 +36,19 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    padding: 20px;
 }
 
 .container {
     background: rgba(255, 255, 255, 0.05);
-    padding: 40px;
+    padding: 30px;
     border-radius: 20px;
     backdrop-filter: blur(15px);
     box-shadow: 0 0 30px rgba(155, 89, 255, 0.5);
     text-align: center;
-    width: 340px;
-    animation: fadeIn 1s ease;
+    width: 100%;
+    max-width: 360px;
 }
 
 input {
@@ -56,7 +57,6 @@ input {
     margin: 10px 0;
     border-radius: 10px;
     border: none;
-    outline: none;
     background: rgba(255,255,255,0.1);
     color: white;
 }
@@ -68,14 +68,11 @@ button {
     border: none;
     background: #9b59ff;
     color: white;
-    font-size: 16px;
     cursor: pointer;
-    transition: 0.3s;
     box-shadow: 0 0 15px #9b59ff;
 }
 
 button:hover {
-    transform: scale(1.05);
     box-shadow: 0 0 25px #b784ff;
 }
 
@@ -84,22 +81,8 @@ button:hover {
     box-shadow: 0 0 20px #5865F2;
 }
 
-.discord-btn:hover {
-    box-shadow: 0 0 30px #7983ff;
-}
-
 h1 {
     text-shadow: 0 0 15px #9b59ff;
-}
-
-a {
-    color: #b784ff;
-    text-decoration: none;
-}
-
-@keyframes fadeIn {
-    from {opacity: 0; transform: translateY(20px);}
-    to {opacity: 1; transform: translateY(0);}
 }
 </style>
 """
@@ -127,12 +110,12 @@ def login():
     <div class="container">
         <h1>Login</h1>
         <form method="POST">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
+            <input name="username" placeholder="Username" required>
+            <input name="password" type="password" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
         <p style="color:red;">{error}</p>
-        <p>Don't have an account? <a href="/signup">Sign up</a></p>
+        <p><a href="/signup">Create account</a></p>
     </div>
     """)
 
@@ -156,14 +139,14 @@ def signup():
     return render_template_string(f"""
     {STYLE}
     <div class="container">
-        <h1>Create Account</h1>
+        <h1>Sign Up</h1>
         <form method="POST">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
+            <input name="username" placeholder="Username" required>
+            <input name="password" type="password" placeholder="Password" required>
             <button type="submit">Sign Up</button>
         </form>
         <p style="color:red;">{error}</p>
-        <p>Already have an account? <a href="/">Login</a></p>
+        <p><a href="/">Back to login</a></p>
     </div>
     """)
 
@@ -190,7 +173,7 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
 
-
+# IMPORTANT: keep this for local testing, ignored by gunicorn
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
